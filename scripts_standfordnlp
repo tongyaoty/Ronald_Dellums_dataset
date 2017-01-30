@@ -1,0 +1,6 @@
+##use standfordnlp 
+## check The Stanford CoreNLP Natural Language Processing Toolkit Manning, Christopher D., Surdeanu, Mihai, Bauer, John, Finkel, Jenny,.pdf
+##use standfordnlp ## check The Stanford CoreNLP Natural Language Processing Toolkit(Manning et al. 2014)
+
+$ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
+tokenize,ssplit,pos,lemma,parse,sentiment -Ronald_Dellums_dataset.txt standfordnlptagged.txt
