@@ -2,6 +2,11 @@
 ## check The Stanford CoreNLP Natural Language Processing Toolkit(Manning et al. 2014)
 ## check http://stanfordnlp.github.io/CoreNLP/cmdline.html
 
+##quick start
+$java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
+tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt 
+XML format
+
 $ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
 tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt -outputFormat conll
 ##tagged infor: tokenize, ssplit,pos,lemma, ner, regexner,parse, sentiment (see Manning et al. 2014, p. 57-58)
