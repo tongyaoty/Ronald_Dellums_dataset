@@ -1,6 +1,8 @@
 ##use standfordnlp 
-## check The Stanford CoreNLP Natural Language Processing Toolkit Manning, Christopher D., Surdeanu, Mihai, Bauer, John, Finkel, Jenny,.pdf
-##use standfordnlp ## check The Stanford CoreNLP Natural Language Processing Toolkit(Manning et al. 2014)
+## check The Stanford CoreNLP Natural Language Processing Toolkit(Manning et al. 2014)
+## check http://stanfordnlp.github.io/CoreNLP/cmdline.html
 
 $ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
-tokenize,ssplit,pos,lemma,parse,sentiment -Ronald_Dellums_dataset.txt standfordnlptagged.txt
+tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt -outputFormat conll
+##tagged infor: tokenize, ssplit,pos,lemma, ner, regexner,parse, sentiment (see Manning et al. 2014, p. 57-58)
+## use conll format instead of xml format check  http://stanfordnlp.github.io/CoreNLP/cmdline.html #Configuration
