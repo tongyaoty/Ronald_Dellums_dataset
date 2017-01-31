@@ -5,7 +5,8 @@
 ##quick start
 $java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
 tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt 
-XML format
+##havetoparsebeforesentiment
+##XML format
 
 $ java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
 tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt -outputFormat conll
