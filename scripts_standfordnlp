@@ -3,6 +3,8 @@
 ## check http://stanfordnlp.github.io/CoreNLP/cmdline.html
 
 ##quick start
+#move input file to standfoldnlp folder
+$ cd standfordnlp
 $java -cp "*" -Xmx2g edu.stanford.nlp.pipeline.StanfordCoreNLP -annotators
 tokenize,ssplit,pos,lemma,ner,regexner,parse,sentiment -file Ronald_Dellums_dataset.txt 
 ##havetoparsebeforesentiment
