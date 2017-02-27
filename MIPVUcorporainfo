@@ -1,0 +1,59 @@
+###column names##
+docid document id, including a1e-fragment01
+reg registers,including news,aca,dem,fic
+sid sentence id
+pnum  paragraph number
+snum  sentence number
+sindex  sentence index
+windex  word index
+wcount  word count
+scount  sentence count
+plen  paragraph length
+slen  sentence length
+word
+lemma
+pot_cohesion  not clear, including 0,1
+cohesion  not clear, including 0,1,9
+metaphor  mrw,-,mflag
+metaphor_correct   mrw,-,mflag
+type  not clear, including -,bridge,imp,impl,lex,lit,met,metimp,morph,phrase,(Blanks)
+postype POS tagging, including AJ0
+wordcat simplified POS,including V,AJ,AV
+wid not clear, including a10-fragment06-cn1
+wcorresp  not clear,including a10-fragment06-cn1
+wstatus not clear, including -,DFMA,(Blanks)
+id  not clear, including a10-fragment06-pv1
+corresp not clear, including a10-fragment06-pv1
+status  not clear, including -,ANIM,double,M,OMM,PP,UNKNOWN,WIDLII
+morph not clear, including -, y and n(yes and no?)
+order not clear, including -
+mettext not clear
+positiion not clear, including 0,045455
+filter_$  not clear, 1, 0
+position_within_sent  including 1-5
+parapos not clear
+paraposition_within_para  not clear,1-5,blanks
+new_wordcat not clear,1-52
+main_wordcat  not clear,1-7
+main_metaph not clear,1-4
+new_reg new register？1-4
+widnew  word id new? 0,1
+wcorrespnew 0,1
+idnew 0,1
+correspnew 0,1
+polyword  0,1
+lexunit 1,2
+newmainwordcat  1-8
+main_met_types  1,2,3,9
+docid_in_numbers  1-117
+news_seven_subregisters 1-7,blanks
+news_three_subsubregister 1-3, blanks
+a9j_vs_others 0,1
+status_in_numbers 1-8
+status_in_numbers_corr_withoutANIM_etc  0-3
+met_corr_in_numbers 1,2,3  ##met recoded in number
+met_vs_nonmet 0,1 ## met recoded in number
+PP_as_nonmet  Personification？0，1 
+numbered  1-10000
+with_PPs  0，1，2
+with_PPs_and_double 0，1，2，3
