@@ -1,0 +1,7 @@
+### preprocess MIPVU corpora###
+lemma with V+AV; V+AVP etc tags look like: break+down
+replace all + to ; 
+replace "" to nothing
+reopen in excel
+copy and paste into MIPVUcorpora_V_ncolV dataset
+
