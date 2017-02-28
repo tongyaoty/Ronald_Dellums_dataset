@@ -1,0 +1,8 @@
+http://stackoverflow.com/questions/32132348/use-grep-and-awk-to-transfer-data-from-srt-to-csv-xls
+awk -v RS= -F'\n' '
+   { 
+      sub(" --> ","\x7c",$2)                 # change "-->" to "|"
+      printf "%s|%s|%s\n",$1,$2,$3           # print scene, time start, time stop, description
+      for(i=4;i<=NF;i++)printf "|||%s\n",$i  # print remaining lines of description
+   }' captions1.srt > newcaption1.txt
+   ##replace | to ;
