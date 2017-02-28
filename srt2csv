@@ -5,4 +5,9 @@ awk -v RS= -F'\n' '
       printf "%s|%s|%s\n",$1,$2,$3           # print scene, time start, time stop, description
       for(i=4;i<=NF;i++)printf "|||%s\n",$i  # print remaining lines of description
    }' captions1.srt > newcaption1.txt
-   ##replace | to ;
+tr '|' ';' < inputfile.txt > outputfile.txt  ## replace | to ;
+open outputfile.txt in TextEdit 
+find and replace -- copy "empty lines+;;;" and paste into search and replace with " " ##replace the break between texts
+open it in excel, keep time stamp as text
+replace time stamp , to . 
+import it in ELAN 
