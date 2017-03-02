@@ -1,0 +1,2 @@
+先用MPEG Streamlclip软件（或是http://www.zamzar.com/）把MP4文件转成wav.音频文件，
+然后在ELAN的Edit里选择Linked files, 选择add,就可以把你要的音频文件增添至你相应的MP4打开的文件中了
