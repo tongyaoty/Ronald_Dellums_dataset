@@ -29,31 +29,32 @@ morph not clear, including -, y (everything that is a hyphenated words) and n(ye
 order not clear, including -
 mettext records only words that have a tag of mrw
 positiion how far it is from the end, including 0,045455
-filter_$  not clear, 1, 0
+filter_$  not clear, 1, 0 filter out some info third person 5 
 position_within_sent  including 1-5
-parapos not clear
+parapos paragragh position; one sentence paragraph 
 paraposition_within_para  not clear,1-5,blanks
-new_wordcat not clear,1-52
-main_wordcat  not clear,1-7
-main_metaph not clear,1-4
-new_reg new register？1-4
-widnew  word id new? 0,1
+new_wordcat word category,fine grained category; 1-52
+main_wordcat  AJ 1,1-7
+main_metaph type of metaphor in number,1-4, 1 and 3 (variale view)
+new_reg new register, new =1 1-4
+widnew  word id new? 0,1   translate two lexical units to 1
 wcorrespnew 0,1
 idnew 0,1
 correspnew 0,1
-polyword  0,1
-lexunit 1,2
-newmainwordcat  1-8
-main_met_types  1,2,3,9
-docid_in_numbers  1-117
+polyword  0,1 
+lexunit 1,2   consist of two words 
+newmainwordcat  1-8   rest category 
+main_met_types  1,2,3,9 (1=indiret, direct, implict, 9 literal) 
+docid_in_numbers  1-117  （all docs in num)
+======
 news_seven_subregisters 1-7,blanks
 news_three_subsubregister 1-3, blanks
 a9j_vs_others 0,1
-status_in_numbers 1-8
-status_in_numbers_corr_withoutANIM_etc  0-3
+status_in_numbers 1-8  ## ANIM and UNKNOWN
+status_in_numbers_corr_withoutANIM_etc  0-3  ##WIDLLI
 met_corr_in_numbers 1,2,3  ##met recoded in number
-met_vs_nonmet 0,1 ## met recoded in number
-PP_as_nonmet  Personification？0，1 
-numbered  1-10000
-with_PPs  0，1，2
-with_PPs_and_double 0，1，2，3
+met_vs_nonmet 0,1   mrw code ## met recoded in number
+PP_as_nonmet  Personification as non-met 0，1 
+numbered  1-10000   
+with_PPs  0，1，2   non-met, met and PP
+with_PPs_and_double 0，1，2，3  non-met, met, PP, double
