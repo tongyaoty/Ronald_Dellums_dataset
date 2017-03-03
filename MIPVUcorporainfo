@@ -5,30 +5,30 @@ sid sentence id
 pnum  paragraph number
 snum  sentence number
 sindex  sentence index
-windex  word index
-wcount  word count
-scount  sentence count
+windex  word index    all the word in order 
+wcount  word count; in one doc.
+scount  sentence count in the whole doc 
 plen  paragraph length
 slen  sentence length
 word
 lemma
-pot_cohesion  not clear, including 0,1
-cohesion  not clear, including 0,1,9
+pot_cohesion  potential cohesion, including 0,1; implict metaphor- it,be 1   
+cohesion  implict metaphor, including 0,1,9
 metaphor  mrw,-,mflag
 metaphor_correct   mrw,-,mflag
-type  not clear, including -,bridge,imp,impl,lex,lit,met,metimp,morph,phrase,(Blanks)
+type  metaphor type, including - (literal),bridge (non/met same time),imp (implicit m),impl (implict m),lex,lit (direct met),met (indirect met),metimp (these: imp and refer back-met same time),morph (-like) (mflags),phrase (as if),(Blanks)
 postype POS tagging, including AJ0
-wordcat simplified POS,including V,AJ,AV
-wid not clear, including a10-fragment06-cn1
+wordcat simplified POS,including V,AJ,AV (recode by the group)
+wid phrasal verb, including a10-fragment06-cn1; put them on one line 
 wcorresp  not clear,including a10-fragment06-cn1
 wstatus not clear, including -,DFMA,(Blanks)
 id  not clear, including a10-fragment06-pv1
 corresp not clear, including a10-fragment06-pv1
-status  not clear, including -,ANIM,double,M,OMM,PP,UNKNOWN,WIDLII
-morph not clear, including -, y and n(yes and no?)
+status  , including -,ANIM (metaphor based on animation),double(PP+Met),M,OMM,PP,UNKNOWN,WIDLII
+morph not clear, including -, y (everything that is a hyphenated words) and n(yes and no?)
 order not clear, including -
-mettext not clear
-positiion not clear, including 0,045455
+mettext records only words that have a tag of mrw
+positiion how far it is from the end, including 0,045455
 filter_$  not clear, 1, 0
 position_within_sent  including 1-5
 parapos not clear
