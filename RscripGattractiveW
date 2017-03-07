@@ -1,6 +1,5 @@
 rm(list=ls())
-load("C:/Users/kka330/Dropbox/MulModCFDG/GesFun/Rscripts/Corpora.RData")
-
+##load functions 
 library(ggplot2)
 library(ggthemes)
 library(reshape2)
@@ -8,34 +7,10 @@ library(plyr)
 library(stringr)
 library(grid)
 
-##### For chapter:
+##load my dataset
+Ellenshow <-read.csv("~/Dropbox/YaoNewDatasets/Talk show clips 1-20/gesturetaggedoutputSQL.csv", header=TRUE)
 
-GCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y'])
-noGCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'n'])
-GCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'y'])
-noGCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'n'])
-
-topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
-
-topfullcorpdiffs(40, bypos=F, baselshuff=2000, splitplot='repulsion', plotheight=3.9,titl='b', save=F, savename = 'Fig1B')
-
-a=topfullcorpdiffs(80, bypos=F, baselshuff=2000) #this saves the table to text
-
-write.csv(rbind.data.frame(a[[1]],a[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/wordstable.csv", quote = F, row.names = F)
-
-### PArt of Speech level
-
-b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=F, savename = 'Fig2PosFreqs2')
-
-write.csv(rbind.data.frame(b[[1]],b[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/postable.csv", quote = F, row.names = F)
-
-c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigramswrds, noGcorpus = noGbigramswrds, bypos=F,baselshuff=2000, titl = 'bigrams', save=T, savename = 'FigBigramRFRs2')
-c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigrams, noGcorpus = noGbigrams, bypos=F,baselshuff=5000, titl = 'bigrams')
-write.csv(rbind.data.frame(c[[1]],c[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/bigramtable.csv", quote = F, row.names = F)
-
-
-##### Functions 
-
+##### Functions copyright Kasper kok 
 theme_grd = theme(              ## Themes for the layout of the plots (determines background color, etc)                 
   plot.background = element_blank(), 
   panel.background = element_blank(),
@@ -57,7 +32,6 @@ theme_grd2 = theme(
 )
 
 ### REPLACE this with your own corpora
-
 #GCC = # your gesture-accompanied
 #noGCC #g-unaccompanied words
 #GCCP #your gesture accompanied PART OF SPEECH corpus
@@ -68,11 +42,16 @@ theme_grd2 = theme(
 #noGCC = allcorps[[3]]
 #GCCP = allcorps[[2]]
 #noGCCP = allcorps[[4]]
+##### For creating GCC and noGCC:
 
+GCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'y'])  ##giving headers is important
+noGCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'n'])
+GCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'y'])
+noGCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'n'])
 
 #####  Freq plot (Figure 1) #####
 
-##TopFullDiffs = DIFFerences between word frequencies for the TOP (80) most frequent words in the FULL corpus
+##TopFullDiffs = differences between word frequencies for the TOP (80) most frequent words in the FULL corpus
 
 topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
@@ -127,7 +106,6 @@ topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, byp
   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
 }
 
-
 #### Baseline voor topfulldiff (this makes the dashed line in Figure 1)
 
 topfullbasel = function(minfreq=100, Gcompanycorpus, noGcorpus, nrshuff=100) {
@@ -150,3 +128,18 @@ for(sh in 1:nrshuff) {
 }
   return(data.frame(means= colMeans(Shuffles), cimin =apply(Shuffles, 2, sort)[ceiling(nrshuff*.025),], cimax=apply(Shuffles, 2, sort)[ceiling(nrshuff*.975),] ))
 }
+
+###creat the attraction/repellent figure for lemma-- baselshuff means shuff 200 times,40 means words with frequency over 40
+topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='repulsion', plotheight=3.9,titl='b', save=F, savename = 'Fig1B')
+a=topfullcorpdiffs(40, bypos=F, baselshuff=200) #this saves the table to text
+write.csv(rbind.data.frame(a[[1]],a[[2]]), "~/Dropbox/YaoNewDatasets/Talk show clips 1-20/Gesture-accompanied words/wordstable.csv", quote = F, row.names = F)
+
+### Part of Speech level
+b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=F, savename = 'Fig2PosFreqs2')
+write.csv(rbind.data.frame(b[[1]],b[[2]]), "~/Dropbox/YaoNewDatasets/Talk show clips 1-20/Gesture-accompanied words/postable.csv", quote = F, row.names = F)
+
+## bigram not considered for now 
+##c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigramswrds, noGcorpus = noGbigramswrds, bypos=F,baselshuff=2000, titl = 'bigrams', save=T, savename = 'FigBigramRFRs2')
+##c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigrams, noGcorpus = noGbigrams, bypos=F,baselshuff=5000, titl = 'bigrams')
+##write.csv(rbind.data.frame(c[[1]],c[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/bigramtable.csv", quote = F, row.names = F)
