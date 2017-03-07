@@ -31,24 +31,6 @@ theme_grd2 = theme(
   legend.text = element_text(size=11)
 )
 
-### REPLACE this with your own corpora
-#GCC = # your gesture-accompanied
-#noGCC #g-unaccompanied words
-#GCCP #your gesture accompanied PART OF SPEECH corpus
-#noGCCP #unaccompanied pos
-
-#allcorps=makecorps()
-#GCC = allcorps[[1]]
-#noGCC = allcorps[[3]]
-#GCCP = allcorps[[2]]
-#noGCCP = allcorps[[4]]
-##### For creating GCC and noGCC:
-
-GCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'y'])  ##giving headers is important
-noGCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'n'])
-GCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'y'])
-noGCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'n'])
-
 ##### function Freq plot (Figure 1) ##### copyright Kasper Kok
 
 ##TopFullDiffs = differences between word frequencies for the TOP (80) most frequent words in the FULL corpus
@@ -129,6 +111,23 @@ for(sh in 1:nrshuff) {
   return(data.frame(means= colMeans(Shuffles), cimin =apply(Shuffles, 2, sort)[ceiling(nrshuff*.025),], cimax=apply(Shuffles, 2, sort)[ceiling(nrshuff*.975),] ))
 }
 
+### REPLACE this with your own corpora
+#GCC = # your gesture-accompanied
+#noGCC #g-unaccompanied words
+#GCCP #your gesture accompanied PART OF SPEECH corpus
+#noGCCP #unaccompanied pos
+
+#allcorps=makecorps()
+#GCC = allcorps[[1]]
+#noGCC = allcorps[[3]]
+#GCCP = allcorps[[2]]
+#noGCCP = allcorps[[4]]
+##### For creating GCC and noGCC:
+
+GCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'y'])  ##giving headers is important
+noGCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'n'])
+GCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'y'])
+noGCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'n'])
 ###creat the attraction/repellent figure for lemma-- baselshuff means shuff 200 times,40 means words with frequency over 40
 topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
 topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='repulsion', plotheight=3.9,titl='b', save=F, savename = 'Fig1B')
