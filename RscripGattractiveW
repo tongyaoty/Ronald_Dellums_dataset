@@ -49,7 +49,7 @@ noGCC = as.character(Ellenshow$lemma[Ellenshow$icodis == 'n'])
 GCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'y'])
 noGCCP = as.character(Ellenshow$POScon_rating[Ellenshow$icodis == 'n'])
 
-#####  Freq plot (Figure 1) #####
+##### function Freq plot (Figure 1) ##### copyright Kasper Kok
 
 ##TopFullDiffs = differences between word frequencies for the TOP (80) most frequent words in the FULL corpus
 
