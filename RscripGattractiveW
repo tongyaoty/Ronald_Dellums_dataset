@@ -1,0 +1,152 @@
+rm(list=ls())
+load("C:/Users/kka330/Dropbox/MulModCFDG/GesFun/Rscripts/Corpora.RData")
+
+library(ggplot2)
+library(ggthemes)
+library(reshape2)
+library(plyr)
+library(stringr)
+library(grid)
+
+##### For chapter:
+
+GCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y'])
+noGCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'n'])
+GCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'y'])
+noGCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'n'])
+
+topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+
+topfullcorpdiffs(40, bypos=F, baselshuff=2000, splitplot='repulsion', plotheight=3.9,titl='b', save=F, savename = 'Fig1B')
+
+a=topfullcorpdiffs(80, bypos=F, baselshuff=2000) #this saves the table to text
+
+write.csv(rbind.data.frame(a[[1]],a[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/wordstable.csv", quote = F, row.names = F)
+
+### PArt of Speech level
+
+b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=F, savename = 'Fig2PosFreqs2')
+
+write.csv(rbind.data.frame(b[[1]],b[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/postable.csv", quote = F, row.names = F)
+
+c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigramswrds, noGcorpus = noGbigramswrds, bypos=F,baselshuff=2000, titl = 'bigrams', save=T, savename = 'FigBigramRFRs2')
+c=topfullcorpdiffs(60, Gcompanycorpus = Gcompanybigrams, noGcorpus = noGbigrams, bypos=F,baselshuff=5000, titl = 'bigrams')
+write.csv(rbind.data.frame(c[[1]],c[[2]]), "C:/Users/kka330/Dropbox/MulModCFDG/Sections/5.2_Gesture-accompanied words/bigramtable.csv", quote = F, row.names = F)
+
+
+##### Functions 
+
+theme_grd = theme(              ## Themes for the layout of the plots (determines background color, etc)                 
+  plot.background = element_blank(), 
+  panel.background = element_blank(),
+  axis.text  = element_text(size=10, colour='black'),
+  axis.title = element_text(size=10),
+  plot.title = element_text(size=10, face='bold', hjust=.5),
+  strip.background = element_rect(fill="white"),
+  plot.subtitle = element_text(hjust = 1)
+)
+
+theme_grd2 = theme(                              
+  plot.background = element_blank(), 
+  panel.background = element_blank(),
+  axis.text  = element_text(size=10, colour='black'),
+  axis.title = element_text(size=11, margin = margin(0,20,0,0)),
+  plot.title = element_text(size=12, face='bold', hjust=.5),
+  strip.background = element_rect(fill="white"),
+  legend.text = element_text(size=11)
+)
+
+### REPLACE this with your own corpora
+
+#GCC = # your gesture-accompanied
+#noGCC #g-unaccompanied words
+#GCCP #your gesture accompanied PART OF SPEECH corpus
+#noGCCP #unaccompanied pos
+
+#allcorps=makecorps()
+#GCC = allcorps[[1]]
+#noGCC = allcorps[[3]]
+#GCCP = allcorps[[2]]
+#noGCCP = allcorps[[4]]
+
+
+#####  Freq plot (Figure 1) #####
+
+##TopFullDiffs = DIFFerences between word frequencies for the TOP (80) most frequent words in the FULL corpus
+
+topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
+  allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
+  freqenoughwords = allsorted[allsorted>=minfreq]
+  withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
+  noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
+  noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
+  nulls = which(is.na(noGfreqsmatched))
+  noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
+  withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
+  noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
+  Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
+  #print(names(Diffs))
+  #names(Diffs)[3]='diffs'
+  Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
+  basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
+  Diffs= cbind(Diffs,basel)
+  DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
+  DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
+  #DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
+  DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
+  DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
+  DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
+  z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
+  DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
+  DiffsSortd$Shuffle='95% Confidence Interval boundary'
+  DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
+  DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
+  if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
+  positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
+  datapoly = merge(DiffsSortd, positions, by=c("lemma"))
+  .e <- environment()
+  p=ggplot(data=datapoly, environment = .e)  
+  if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
+  if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
+  if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
+  p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
+  if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
+  if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
+  if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
+  xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
+  titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
+  p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
+    geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
+    geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
+  scale_linetype_manual(values=2)
+  if(!supprpl) {quartz(6.5,plotheight); print(p)}
+  if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
+  attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
+  rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
+  allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
+  return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
+}
+
+
+#### Baseline voor topfulldiff (this makes the dashed line in Figure 1)
+
+topfullbasel = function(minfreq=100, Gcompanycorpus, noGcorpus, nrshuff=100) {
+  allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
+  freqenoughwords = allsorted[allsorted>=minfreq]
+  withGfreqsm=noGfreqsm=rep(0,length(freqenoughwords)); names(withGfreqsm)=names(noGfreqsm)=sort(names(freqenoughwords))
+  Shuffles = matrix(0,nrshuff,length(freqenoughwords)) 
+for(sh in 1:nrshuff) {
+  samp = sample(1:length(c(Gcompanycorpus, noGcorpus)),length(Gcompanycorpus))
+  GcompX = as.character(c(Gcompanycorpus, noGcorpus)[samp])
+  noGX = as.character(c(Gcompanycorpus, noGcorpus)[!(1:length(c(Gcompanycorpus, noGcorpus)) %in% samp)])
+  withGfreqs = table(GcompX)[names(table(GcompX)) %in% names(freqenoughwords)]
+  noGfreqs = table(noGX)[names(table(noGX)) %in% names(freqenoughwords)]
+  withGfreqsm[match(names(withGfreqs), names(withGfreqsm))]=withGfreqs
+  noGfreqsm[match(names(noGfreqs), names(noGfreqsm))]=noGfreqs
+  withGfreqsNormd = withGfreqsm/length(GcompX)
+  noGfreqsNormd = noGfreqsm/length(noGcorpus)
+  Shuffles[sh,] = log(withGfreqsNormd/noGfreqsNormd) ## association measure
+  colnames(Shuffles) = names(withGfreqsNormd)
+}
+  return(data.frame(means= colMeans(Shuffles), cimin =apply(Shuffles, 2, sort)[ceiling(nrshuff*.025),], cimax=apply(Shuffles, 2, sort)[ceiling(nrshuff*.975),] ))
+}
