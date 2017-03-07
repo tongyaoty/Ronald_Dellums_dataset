@@ -29,6 +29,8 @@ Number of Fisher Scoring iterations: 4
 > boxplot(formula = gesturetaggedoutputSQL$V12 ~ gesturetaggedoutputSQL$V9, data = gesturetaggedoutputSQL, xlab = "gesture", ylab = "concreteness", frame.plot =F, staplewex = 0, boxfill = "grey80", varwith = T)
 > boxplot(formula = gesturetaggedoutputSQL$V12 ~ gesturetaggedoutputSQL$V8, data = gesturetaggedoutputSQL, xlab = "gesture", ylab = "concreteness", frame.plot =F, staplewex = 0, boxfill = "grey80", varwith = T)
 > View(gesturetaggedoutputSQL)
+
+###running scripts begin here
 > View(gesturetaggedoutputSQL)
 > GCC = gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y']
 > noGCC = gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'n']
