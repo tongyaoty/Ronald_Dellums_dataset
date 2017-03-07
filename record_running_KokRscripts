@@ -1,0 +1,592 @@
+## record running scripts--problems and solutions
+> gesturetaggedoutputSQL <- read.csv("~/Dropbox/YaoNewDatasets/Talk show clips 1-20/gesturetaggedoutputSQL.csv", header=FALSE)
+>   View(gesturetaggedoutputSQL)
+> summary(glm(V9 ~ V12+V13,family="binomial", data=gesturetaggedoutputSQL))
+
+Call:
+glm(formula = V9 ~ V12 + V13, family = "binomial", data = gesturetaggedoutputSQL)
+
+Deviance Residuals: 
+    Min       1Q   Median       3Q      Max  
+-1.0158  -0.8632  -0.8330   1.4578   1.6640  
+
+Coefficients:
+              Estimate Std. Error z value Pr(>|z|)    
+(Intercept) -1.106e+00  7.069e-02 -15.649  < 2e-16 ***
+V12          1.427e-01  2.423e-02   5.888 3.91e-09 ***
+V13         -1.291e-07  4.433e-08  -2.913  0.00358 ** 
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+(Dispersion parameter for binomial family taken to be 1)
+
+    Null deviance: 9163.1  on 7374  degrees of freedom
+Residual deviance: 9121.4  on 7372  degrees of freedom
+AIC: 9127.4
+
+Number of Fisher Scoring iterations: 4
+
+> boxplot(formula = gesturetaggedoutputSQL$V12 ~ gesturetaggedoutputSQL$V9, data = gesturetaggedoutputSQL, xlab = "gesture", ylab = "concreteness", frame.plot =F, staplewex = 0, boxfill = "grey80", varwith = T)
+> boxplot(formula = gesturetaggedoutputSQL$V12 ~ gesturetaggedoutputSQL$V8, data = gesturetaggedoutputSQL, xlab = "gesture", ylab = "concreteness", frame.plot =F, staplewex = 0, boxfill = "grey80", varwith = T)
+> View(gesturetaggedoutputSQL)
+> View(gesturetaggedoutputSQL)
+> GCC = gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y']
+> noGCC = gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'n']
+> GCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y'])
+> noGCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'n'])
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Error: could not find function "topfullcorpdiffs"
+> theme_grd = theme(              ## Themes for the layout of the plots (determines background color, etc)                 
++   plot.background = element_blank(), 
++   panel.background = element_blank(),
++   axis.text  = element_text(size=10, colour='black'),
++   axis.title = element_text(size=10),
++   plot.title = element_text(size=10, face='bold', hjust=.5),
++   strip.background = element_rect(fill="white"),
++   plot.subtitle = element_text(hjust = 1)
++ )
+Error: could not find function "theme"
+> 
+> theme_grd2 = theme(                              
++   plot.background = element_blank(), 
++   panel.background = element_blank(),
++   axis.text  = element_text(size=10, colour='black'),
++   axis.title = element_text(size=11, margin = margin(0,20,0,0)),
++   plot.title = element_text(size=12, face='bold', hjust=.5),
++   strip.background = element_rect(fill="white"),
++   legend.text = element_text(size=11)
++ )
+Error: could not find function "theme"
+> 
+> ### REPLACE this with your own corpora
+> 
+> #GCC = # your gesture-accompanied
+> #noGCC #g-unaccompanied words
+> #GCCP #your gesture accompanied PART OF SPEECH corpus
+> #noGCCP #unaccompanied pos
+> 
+> #allcorps=makecorps()
+> #GCC = allcorps[[1]]
+> #noGCC = allcorps[[3]]
+> #GCCP = allcorps[[2]]
+> #noGCCP = allcorps[[4]]
+> 
+> 
+> #####  Freq plot (Figure 1) #####
+> 
+> ##TopFullDiffs = DIFFerences between word frequencies for the TOP (80) most frequent words in the FULL corpus
+> 
+> topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=T,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
++   noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
++   nulls = which(is.na(noGfreqsmatched))
++   noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
++   withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
++   noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
++   Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
++   names(Diffs)[3]='diffs'
++   Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
++   basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
++   Diffs= cbind(Diffs,basel)
++   DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
++   DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
++   DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
++   DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
++   DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
++   DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
++   z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
++   DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
++   DiffsSortd$Shuffle='95% Confidence Interval boundary'
++   DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
++   DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
++   if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
++   positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
++   datapoly = merge(DiffsSortd, positions, by=c("lemma"))
++   .e <- environment()
++   p=ggplot(data=datapoly, environment = .e)  
++   if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
++   if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
++   if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
++   p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
++   if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
++   if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
++   if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
++   xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
++   titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
++   p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
++     geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
++     geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
++   scale_linetype_manual(values=2)
++   if(!supprpl) {windows(6.5,plotheight); print(p)}
++   if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
++   attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
++   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
++ }
+> 
+> 
+> #### Baseline voor topfulldiff (this makes the dashed line in Figure 1)
+> 
+> topfullbasel = function(minfreq=100, Gcompanycorpus, noGcorpus, nrshuff=100) {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqsm=noGfreqsm=rep(0,length(freqenoughwords)); names(withGfreqsm)=names(noGfreqsm)=sort(names(freqenoughwords))
++   Shuffles = matrix(0,nrshuff,length(freqenoughwords)) 
++ for(sh in 1:nrshuff) {
++   samp = sample(1:length(c(Gcompanycorpus, noGcorpus)),length(Gcompanycorpus))
++   GcompX = as.character(c(Gcompanycorpus, noGcorpus)[samp])
++   noGX = as.character(c(Gcompanycorpus, noGcorpus)[!(1:length(c(Gcompanycorpus, noGcorpus)) %in% samp)])
++   withGfreqs = table(GcompX)[names(table(GcompX)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGX)[names(table(noGX)) %in% names(freqenoughwords)]
++   withGfreqsm[match(names(withGfreqs), names(withGfreqsm))]=withGfreqs
++   noGfreqsm[match(names(noGfreqs), names(noGfreqsm))]=noGfreqs
++   withGfreqsNormd = withGfreqsm/length(GcompX)
++   noGfreqsNormd = noGfreqsm/length(noGcorpus)
++   Shuffles[sh,] = log(withGfreqsNormd/noGfreqsNormd) ## association measure
++   colnames(Shuffles) = names(withGfreqsNormd)
++ }
++   return(data.frame(means= colMeans(Shuffles), cimin =apply(Shuffles, 2, sort)[ceiling(nrshuff*.025),], cimax=apply(Shuffles, 2, sort)[ceiling(nrshuff*.975),] ))
++ }
+> library(ggplot2)
+Warning message:
+package 'ggplot2' was built under R version 3.2.5 
+> library(ggthemes)
+Error in library(ggthemes) : there is no package called 'ggthemes'
+> library(reshape2)
+> library(plyr)
+> library(stringr)
+> library(grid)
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Error in names(Diffs)[3] = "diffs" : 
+  'names' attribute [3] must be the same length as the vector [2]
+> topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
++   noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
++   nulls = which(is.na(noGfreqsmatched))
++   noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
++   withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
++   noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
++   Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
++   print(names(Diffs))
++   names(Diffs)[3]='diffs'
++   Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
++   basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
++   Diffs= cbind(Diffs,basel)
++   DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
++   DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
++   DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
++   DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
++   DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
++   DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
++   z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
++   DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
++   DiffsSortd$Shuffle='95% Confidence Interval boundary'
++   DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
++   DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
++   if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
++   positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
++   datapoly = merge(DiffsSortd, positions, by=c("lemma"))
++   .e <- environment()
++   p=ggplot(data=datapoly, environment = .e)  
++   if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
++   if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
++   if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
++   p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
++   if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
++   if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
++   if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
++   xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
++   titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
++   p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
++     geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
++     geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
++   scale_linetype_manual(values=2)
++   if(!supprpl) {windows(6.5,plotheight); print(p)}
++   if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
++   attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
++   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
++ }
+> GCC = as.character(gesturetaggedoutputSQL$V6[gesturetaggedoutputSQL$V9 == 'y'])
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+[1] "lemma" "diffs"
+Error in names(Diffs)[3] = "diffs" : 
+  'names' attribute [3] must be the same length as the vector [2]
+> #####  Freq plot (Figure 1) #####
+> 
+> ##TopFullDiffs = DIFFerences between word frequencies for the TOP (80) most frequent words in the FULL corpus
+> 
+> topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
++   noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
++   nulls = which(is.na(noGfreqsmatched))
++   noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
++   withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
++   noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
++   Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
++   #print(names(Diffs))
++   #names(Diffs)[3]='diffs'
++   Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
++   basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
++   Diffs= cbind(Diffs,basel)
++   DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
++   DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
++   DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
++   DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
++   DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
++   DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
++   z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
++   DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
++   DiffsSortd$Shuffle='95% Confidence Interval boundary'
++   DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
++   DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
++   if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
++   positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
++   datapoly = merge(DiffsSortd, positions, by=c("lemma"))
++   .e <- environment()
++   p=ggplot(data=datapoly, environment = .e)  
++   if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
++   if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
++   if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
++   p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
++   if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
++   if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
++   if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
++   xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
++   titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
++   p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
++     geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
++     geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
++   scale_linetype_manual(values=2)
++   if(!supprpl) {windows(6.5,plotheight); print(p)}
++   if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
++   attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
++   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
++ }
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Error in topfullcorpdiffs(80, bypos = F, baselshuff = 2000, splitplot = "attraction",  : 
+  object 'poss' not found
+> topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
++   noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
++   nulls = which(is.na(noGfreqsmatched))
++   noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
++   withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
++   noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
++   Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
++   #print(names(Diffs))
++   #names(Diffs)[3]='diffs'
++   Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
++   basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
++   Diffs= cbind(Diffs,basel)
++   DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
++   DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
++   #DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
++   DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
++   DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
++   DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
++   z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
++   DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
++   DiffsSortd$Shuffle='95% Confidence Interval boundary'
++   DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
++   DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
++   if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
++   positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
++   datapoly = merge(DiffsSortd, positions, by=c("lemma"))
++   .e <- environment()
++   p=ggplot(data=datapoly, environment = .e)  
++   if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
++   if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
++   if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
++   p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
++   if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
++   if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
++   if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
++   xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
++   titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
++   p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
++     geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
++     geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
++   scale_linetype_manual(values=2)
++   if(!supprpl) {windows(6.5,plotheight); print(p)}
++   if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
++   attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
++   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
++ }
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Error in topfullcorpdiffs(80, bypos = F, baselshuff = 2000, splitplot = "attraction",  : 
+  object 'theme_grd2' not found
+> theme_grd = theme(              ## Themes for the layout of the plots (determines background color, etc)                 
++   plot.background = element_blank(), 
++   panel.background = element_blank(),
++   axis.text  = element_text(size=10, colour='black'),
++   axis.title = element_text(size=10),
++   plot.title = element_text(size=10, face='bold', hjust=.5),
++   strip.background = element_rect(fill="white"),
++   plot.subtitle = element_text(hjust = 1)
++ )
+> 
+> theme_grd2 = theme(                              
++   plot.background = element_blank(), 
++   panel.background = element_blank(),
++   axis.text  = element_text(size=10, colour='black'),
++   axis.title = element_text(size=11, margin = margin(0,20,0,0)),
++   plot.title = element_text(size=12, face='bold', hjust=.5),
++   strip.background = element_rect(fill="white"),
++   legend.text = element_text(size=11)
++ )
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Error in topfullcorpdiffs(80, bypos = F, baselshuff = 2000, splitplot = "attraction",  : 
+  could not find function "windows"
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Error in topfullcorpdiffs(80, bypos = F, baselshuff = 2000, splitplot = "attraction",  : 
+  could not find function "windows"
+> #noGCCP = allcorps[[4]]
+> 
+> 
+> #####  Freq plot (Figure 1) #####
+> 
+> ##TopFullDiffs = DIFFerences between word frequencies for the TOP (80) most frequent words in the FULL corpus
+> 
+> topfullcorpdiffs = function(minfreq=80, Gcompanycorpus=GCC, noGcorpus=noGCC, bypos=F,baselshuff=100, supprpl=F, splitplot='', plotheight=4.5, titl='parts of speech', save=F, savename='plottest') {
++   allsorted = sort(table(c(Gcompanycorpus, noGcorpus)), decreasing = T)
++   freqenoughwords = allsorted[allsorted>=minfreq]
++   withGfreqs = table(Gcompanycorpus)[names(table(Gcompanycorpus)) %in% names(freqenoughwords)]
++   noGfreqs = table(noGcorpus)[names(table(noGcorpus)) %in% names(freqenoughwords)]
++   noGfreqsmatched = noGfreqs[match(names(withGfreqs), names(noGfreqs))]
++   nulls = which(is.na(noGfreqsmatched))
++   noGfreqsmatched[nulls]=0; names(noGfreqsmatched)[nulls] = names(withGfreqs)[nulls]
++   withGfreqsNormd = withGfreqs/length(Gcompanycorpus)
++   noGfreqsNormd = noGfreqsmatched/length(noGcorpus)
++   Diffs = data.frame(lemma=names(withGfreqs), diffs = log(withGfreqsNormd/noGfreqsNormd))
++   #print(names(Diffs))
++   #names(Diffs)[3]='diffs'
++   Diffs$rfr_raw= round(exp(abs(Diffs$diffs)),2)
++   basel=topfullbasel(minfreq, Gcompanycorpus, noGcorpus,baselshuff)
++   Diffs= cbind(Diffs,basel)
++   DiffsSortd = Diffs[order(Diffs$diffs,decreasing = T),]
++   DiffsSortd$lemma = factor(DiffsSortd$lemma, levels=DiffsSortd$lemma[1:length(freqenoughwords)])
++   #DiffsSortd$pos = poss$simple[sapply(as.character(DiffsSortd$lemma), function(x) which(lemmas$V7==x)[1])]
++   DiffsSortd$ymin = sapply(DiffsSortd$diffs, function(x) min(0,x))
++   DiffsSortd$ymax = sapply(DiffsSortd$diffs, function(x) max(0,x))
++   DiffsSortd$dir = ifelse(DiffsSortd$diffs>0,'attraction', 'repulsion')
++   z=abs(with(DiffsSortd, diffs/((cimax - cimin)/(2*1.96))))
++   DiffsSortd$p = signif(exp(-0.717*z-0.416*z^2),digits=3)
++   DiffsSortd$Shuffle='95% Confidence Interval boundary'
++   DiffsSortd$withgfreqs = withGfreqs[row.names(DiffsSortd)]
++   DiffsSortd$nogfreqs = noGfreqs[row.names(DiffsSortd)]
++   if(splitplot!='') DiffsSortd=subset(DiffsSortd, dir==splitplot)
++   positions = data.frame(lemma = rep(DiffsSortd$lemma, each = 4), x = rep(1:nrow(DiffsSortd), each=4) + rep(c(0,0,1,1),nrow(DiffsSortd)), y = as.vector(with(DiffsSortd,rbind(ymin,ymax, ymax,ymin))))
++   datapoly = merge(DiffsSortd, positions, by=c("lemma"))
++   .e <- environment()
++   p=ggplot(data=datapoly, environment = .e)  
++   if(bypos) p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, fill = pos, group=lemma)) else   p=p+geom_polygon(aes(x=x, y=y,ymin = ymin, ymax=ymax, group=lemma), alpha=.3)
++   if(any(DiffsSortd$dir=='attraction')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==1), aes(x=which(sign(DiffsSortd$diffs)==1), y=ifelse(bypos,-.001,-.0002), label=lemma, sep=''), angle=90, hjust=1,vjust=1, size=4) #size 3
++   if(any(DiffsSortd$dir=='repulsion')) p=p+geom_text(data=subset(DiffsSortd, sign(diffs)==-1), aes(x=which(sign(DiffsSortd$diffs)==-1), y=ifelse(bypos,.001,.0002), label=lemma, sep=''), angle=90, hjust=0, vjust=1, size=4) 
++   p=p + theme_grd2 + theme(axis.text.x  = element_blank(), axis.ticks = element_blank(), legend.title=element_blank())
++   if(splitplot=='attraction') p=p+theme(legend.position=c(.75,.8)) + expand_limits(y=-.5)
++   if(splitplot=='repulsion') p=p+theme(legend.position=c(.25,.1)) + expand_limits(y=.3)
++   if(splitplot=='') p=p+theme(legend.position=c(.25,.25))
++   xlb= ifelse(titl=='a', 'Gesture-attracting lemmas\n\n(a)', ifelse(titl=='b', 'Gesture-repelling lemmas\n\n(b)', paste('Most common ', titl,' in corpus', splitplot, '',sep='')))
++   titl= ifelse(titl %in% c('a','b'), 'lemmas', titl)
++   p=p+xlab(xlb)+ ylab('Relative frequency ratio (log)') + ggtitle(paste('Relative frequency ratios for most common',titl,'in corpus'))+
++     geom_line(data=subset(DiffsSortd,diffs>=0), aes(x=which(DiffsSortd$diffs>0)+.5, y=cimax, linetype=Shuffle),  size=.5)+
++     geom_line(data=subset(DiffsSortd,diffs<0), aes(x=which(DiffsSortd$diffs<0)+.5, y=cimin, linetype=Shuffle), size=.5)+
++   scale_linetype_manual(values=2)
++   if(!supprpl) {quartz(6.5,plotheight); print(p)}
++   if(save) {ggsave(paste('C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/', savename,'.png', sep=''), height=plotheight, width=6.5, units='in', dpi=500)}
++   attr=subset(DiffsSortd, diffs>cimax, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   rep=subset(DiffsSortd, diffs<cimin, select=c('lemma', 'withgfreqs', 'nogfreqs', 'rfr_raw', 'p'))
++   allw=subset(DiffsSortd, select=c('lemma', 'rfr_raw', 'diffs', 'p', 'cimax'))
++   return(list(attractors=attr[order(-attr$rfr_raw),],repellers=rep[order(-rep$rfr_raw),], allw ))
++ }
+> topfullcorpdiffs(80, bypos=F, baselshuff=2000, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+$attractors
+    lemma withgfreqs nogfreqs rfr_raw        p
+the   the         96      119    1.77 4.41e-05
+go     go         39       53    1.62 3.28e-02
+she   she         43       64    1.48 4.15e-02
+
+$repellers
+[1] lemma      withgfreqs nogfreqs   rfr_raw   
+[5] p         
+<0 rows> (or 0-length row.names)
+
+[[3]]
+     lemma rfr_raw      diffs        p     cimax
+the    the    1.77 0.57285384 4.41e-05 0.2643810
+go      go    1.62 0.48089887 3.28e-02 0.3912139
+she    she    1.48 0.38994617 4.15e-02 0.3509115
+we      we    1.37 0.31762551 1.04e-01 0.3500069
+he      he    1.22 0.19984247 3.98e-01 0.4019667
+a        a    1.10 0.09448196 5.82e-01 0.3122054
+have  have    1.10 0.09448196 6.71e-01 0.3903273
+it      it    1.07 0.07095146 6.61e-01 0.2989651
+
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> topfullcorpdiffs(50, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+$attractors
+    lemma withgfreqs nogfreqs rfr_raw        p
+the   the         96      119    1.77 2.28e-05
+go     go         39       53    1.62 2.94e-02
+she   she         43       64    1.48 5.69e-02
+
+$repellers
+[1] lemma      withgfreqs nogfreqs   rfr_raw   
+[5] p         
+<0 rows> (or 0-length row.names)
+
+[[3]]
+     lemma rfr_raw      diffs        p     cimax
+the    the    1.77 0.57285384 2.28e-05 0.2444221
+in      in    1.62 0.48224749 7.65e-02 0.5440071
+go      go    1.62 0.48089887 2.94e-02 0.4362313
+she    she    1.48 0.38994617 5.69e-02 0.3509115
+we      we    1.37 0.31762551 7.12e-02 0.3176255
+he      he    1.22 0.19984247 4.24e-01 0.4511569
+my      my    1.20 0.18149333 6.30e-01 0.6698461
+get    get    1.12 0.11646086 6.59e-01 0.4309542
+a        a    1.10 0.09448196 6.00e-01 0.3122054
+have  have    1.10 0.09448196 6.71e-01 0.3903273
+just  just    1.10 0.09448196 7.95e-01 0.5909188
+it      it    1.07 0.07095146 6.61e-01 0.2989651
+
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> topfullcorpdiffs(30, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+ Show Traceback
+ 
+ Rerun with Debug
+ Error in data.frame(..., check.names = FALSE) : 
+  arguments imply differing number of rows: 42, 43 > topfullcorpdiffs(40, bypos=F, baselshuff=200, splitplot='attraction', plotheight=3.7, titl='a', save=F, savename = 'Fig1A')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+$attractors
+    lemma withgfreqs nogfreqs rfr_raw        p
+the   the         96      119    1.77 0.000154
+in     in         28       38    1.62 0.045000
+go     go         39       53    1.62 0.042200
+
+$repellers
+[1] lemma      withgfreqs nogfreqs   rfr_raw   
+[5] p         
+<0 rows> (or 0-length row.names)
+
+[[3]]
+     lemma rfr_raw      diffs        p     cimax
+the    the    1.77 0.57285384 0.000154 0.2842385
+in      in    1.62 0.48224749 0.045000 0.4199044
+go      go    1.62 0.48089887 0.042200 0.4362313
+this  this    1.57 0.45115690 0.146000 0.5363147
+she    she    1.48 0.38994617 0.069400 0.3899462
+we      we    1.37 0.31762551 0.104000 0.3500069
+he      he    1.22 0.19984247 0.371000 0.3523111
+my      my    1.20 0.18149333 0.625000 0.5113758
+get    get    1.12 0.11646086 0.678000 0.4913633
+a        a    1.10 0.09448196 0.544000 0.3122054
+have  have    1.10 0.09448196 0.692000 0.3903273
+just  just    1.10 0.09448196 0.757000 0.5113758
+it      it    1.07 0.07095146 0.664000 0.2768035
+
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> topfullcorpdiffs(40, bypos=F, baselshuff=2000, splitplot='repulsion', plotheight=3.9,titl='b', save=F, savename = 'Fig1B')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+$attractors
+[1] lemma      withgfreqs nogfreqs   rfr_raw   
+[5] p         
+<0 rows> (or 0-length row.names)
+
+$repellers
+     lemma withgfreqs nogfreqs rfr_raw        p
+and    and         21      191    4.14 3.44e-22
+for    for          6       35    2.65 7.64e-03
+so      so         15       61    1.85 1.61e-02
+that  that         40      160    1.82 7.53e-05
+you    you         82      264    1.46 8.31e-04
+
+[[3]]
+      lemma rfr_raw        diffs        p     cimax
+like   like    1.01 -0.007300737 9.72e-01 0.3512018
+be       be    1.01 -0.009249325 9.11e-01 0.1418026
+I         I    1.03 -0.028120365 8.83e-01 0.3262836
+to       to    1.06 -0.059668723 7.04e-01 0.2768035
+not     not    1.12 -0.116827137 5.80e-01 0.3750969
+they   they    1.17 -0.154978903 4.81e-01 0.3899462
+do       do    1.18 -0.167882307 3.31e-01 0.3095933
+on       on    1.22 -0.200982256 4.65e-01 0.4801444
+of       of    1.23 -0.204011031 4.11e-01 0.4309542
+there there    1.46 -0.379976023 1.60e-01 0.4801444
+you     you    1.46 -0.381600718 8.31e-04 0.2177802
+know   know    1.54 -0.431611139 1.53e-01 0.5407691
+that   that    1.82 -0.598665223 7.53e-05 0.2768035
+what   what    1.82 -0.598665223 6.53e-02 0.5464671
+so       so    1.85 -0.615194525 1.61e-02 0.4691754
+for     for    2.65 -0.975959455 7.64e-03 0.6410257
+and     and    4.14 -1.420121853 3.44e-22 0.2667279
+
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> GCCP = as.character(gesturetaggedoutputSQL$V7[gesturetaggedoutputSQL$V9 == 'y'])
+> noGCCP = as.character(gesturetaggedoutputSQL$V7[gesturetaggedoutputSQL$V9 == 'n'])
+> b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=T, savename = 'Fig2PosFreqs2')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Warning: Ignoring unknown aesthetics: sep
+ Show Traceback
+ 
+ Rerun with Debug
+ Error in grDevices::dev.off() : 
+  QuartzBitmap_Output - unable to open file 'C:/Users/kka330/Dropbox/MulModCFDG/Sections/7 Gesture-accompanied words/Fig2PosFreqs2.png' In addition: Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=F, savename = 'Fig2PosFreqs2')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Warning: Ignoring unknown aesthetics: sep
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
+> GCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'y'])
+> noGCCP = as.character(gesturetaggedoutputSQL$V14[gesturetaggedoutputSQL$V9 == 'n'])
+> b=topfullcorpdiffs(60, Gcompanycorpus = GCCP, noGcorpus = noGCCP, bypos = F,baselshuff=2000, save=F, savename = 'Fig2PosFreqs2')
+Warning: Ignoring unknown aesthetics: ymin, ymax
+Warning: Ignoring unknown aesthetics: sep
+Warning: Ignoring unknown aesthetics: sep
+Warning message:
+'mode(title)' differs between new and previous
+	 ==> NOT changing 'title' 
